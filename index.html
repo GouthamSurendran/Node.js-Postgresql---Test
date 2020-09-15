@@ -1,66 +1,67 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
+<html lang="en">
 
-    <title>ObjectRocket Articles</title>
-    <!-- BS4 source -->
-    <link
-     rel="stylesheet"
-     href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-     crossorigin="anonymous"
-   />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Todo test</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
 
-    <script
-     src="https://code.jquery.com/jquery-3.4.1.js"
-     integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-     crossorigin="anonymous"
-   ></script>
-
-    <!-- JSON 2 HTML source -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/json2html/1.3.0/json2html.min.js"></script>
-
-    <!-- CSS for doc body -->
-    <style>
-      body {
-        margin: 1rem;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>ObjectRocket Node Postgres App</h1>
-    <form method="POST" action="http://127.0.0.1:3456/query">
-        <div class="form-group">
-          <label for="query-input">Postgres Integer Query:</label>
-          <input id="query-input" class="form-control"
-         type="number" name="query" placeholder="0"></input>
-          <br>
-        </div>
-    
-        <button class="btn btn-success" type="submit" value="Submit">Submit Query</button>
-      </form>
-      <br>
-      <!-- BS4 table begins here -->
-<div class="container">
-    <h2>Postgres-NodeJs Table Example</h2>
-    <table id="postgres-table" class="table table-striped">
-      <!--
-         HTML data returned from NodeJs app will go here
-       -->
-    </table>
+<body>
+  <div class='container p-3 my-3 bg-primary text-white'>
+    <h2>Todo List</h2>
+    <ol id="olTodo">
+    </ol>
+    <button type="button" class="btn-light btn-outline-primary" id='btnCreate'>Add Todo</button>
   </div>
-  <script>
-    window.addEventListener('load', function() {
-      let pgTable = document.getElementById("postgres-table");
-      try {
-        pgTable.innerHTML = tableData;
-        console.log(`\ntableData: ${tableData}`);
-      } catch(err) {
-        pgTable.innerHTML = "";
-      }
-    });
+    <script>
+      document.getElementById("btnCreate");
+      btnCreate.addEventListener("click",async e=>{
+              const jsonRequest = {}
+              jsonRequest.text = prompt("Enter your Todo item "); //list element id
+              const result = await fetch("http://localhost:8080/todo", {
+                method: "POST",
+                headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
+              });
+              const success = await result.json();
+              readTodo();
+              alert("Created! ");
+      })
+      readTodo();
+      async function readTodo() {
+        try {
+          const olTodo = document.getElementById("olTodo");
+          while(olTodo.firstChild) olTodo.removeChild(olTodo.firstChild);
+          const result = await fetch("http://localhost:8080/todo", { method: "GET" });
+          const todos = await result.json();
+          todos.forEach(element => {
+            const li = document.createElement("li");
+            li.textContent = element.todotext;
+            li.id = element.id;
+            li.addEventListener("click", async e => {
+              const jsonRequest = {}
+              jsonRequest.id = e.target.id; //list element id
+              const result = await fetch("http://localhost:8080/todo", {
+                method: "DELETE",
+                headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
+              });
+              const success = await result.json();
+              readTodo();
+              alert("Todo item deleted! ");
+            });
+            olTodo.appendChild(li);
+          });
+        }
+        catch (e) {
+          console.log(e);
+        }
 
-  </script>
-  </body>
-</html>
+      }
+    </script>
+  </div>
+</body>

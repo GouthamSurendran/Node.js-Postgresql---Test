@@ -5,63 +5,77 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Todo test</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>Todo test</title>
 </head>
 
 <body>
-  <div class='container p-3 my-3 bg-primary text-white'>
-    <h2>Todo List</h2>
-    <ol id="olTodo">
+  <div class='container p-3 my-2 bg-primary text-white' style="text-align: center;">
+    <h3>Todo List</h3>
+    <ol id="olTodo" style="text-align: center;">
     </ol>
-    <button type="button" class="btn-light btn-outline-primary" id='btnCreate'>Add Todo</button>
-  </div>
-    <script>
-      document.getElementById("btnCreate");
-      btnCreate.addEventListener("click",async e=>{
-              const jsonRequest = {}
-              jsonRequest.text = prompt("Enter your Todo item "); //list element id
-              const result = await fetch("http://localhost:8080/todo", {
-                method: "POST",
-                headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
-              });
-              const success = await result.json();
-              readTodo();
-              alert("Created! ");
-      })
-      readTodo();
-      async function readTodo() {
-        try {
-          const olTodo = document.getElementById("olTodo");
-          while(olTodo.firstChild) olTodo.removeChild(olTodo.firstChild);
-          const result = await fetch("http://localhost:8080/todo", { method: "GET" });
-          const todos = await result.json();
-          todos.forEach(element => {
-            const li = document.createElement("li");
-            li.textContent = element.todotext;
-            li.id = element.id;
-            li.addEventListener("click", async e => {
-              const jsonRequest = {}
-              jsonRequest.id = e.target.id; //list element id
-              const result = await fetch("http://localhost:8080/todo", {
-                method: "DELETE",
-                headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
-              });
-              const success = await result.json();
-              readTodo();
-              alert("Todo item deleted! ");
-            });
-            olTodo.appendChild(li);
-          });
-        }
-        catch (e) {
-          console.log(e);
-        }
+    <div class="form-inline" style="display: block;">
+      <input type="text" id="getItem" class="form-control" value="Enter today's task to do" onfocus="this.value=''">
+      <button type="button" class="btn btn-success"
+        id='btnCreate'>Add</button>
+    </div>
 
-      }
-    </script>
+  </div>
   </div>
 </body>
+
+<script>
+  document.getElementById("btnCreate");
+  btnCreate.addEventListener("click", async e => {
+    const jsonRequest = {}
+    // jsonRequest.text = prompt("Enter your Todo item "); //list element id
+    jsonRequest.text = document.getElementById("getItem").value;
+    if (jsonRequest.text != "") {
+      const result = await fetch("http://localhost:8080/todo", {
+        method: "POST",
+        headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
+      });
+      const success = await result.json();
+      readTodo();
+      document.getElementById("getItem").value = "";
+      alert("Created! ");
+    }
+    else {
+      alert("Empty item cannot be added!");
+    }
+  })
+  readTodo();
+  async function readTodo() {
+    try {
+      const olTodo = document.getElementById("olTodo");
+      while (olTodo.firstChild) olTodo.removeChild(olTodo.firstChild);
+      const result = await fetch("http://localhost:8080/todo", { method: "GET" });
+      const todos = await result.json();
+      todos.forEach(element => {
+        const li = document.createElement("li");
+        li.textContent = element.todotext;
+        li.id = element.id;
+        li.addEventListener("click", async e => {
+          var result = confirm("Are you sure you want to delete the item?");
+          if (result) {
+            const jsonRequest = {}
+            jsonRequest.id = e.target.id; //list element id
+            const result = await fetch("http://localhost:8080/todo", {
+              method: "DELETE",
+              headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
+            });
+            const success = await result.json();
+            readTodo();
+            alert("Todo item deleted! ");
+          }
+        });
+        olTodo.appendChild(li);
+      });
+    }
+    catch (e) {
+      console.log(e);
+    }
+
+  }
+</script>

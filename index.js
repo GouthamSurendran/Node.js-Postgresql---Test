@@ -74,13 +74,6 @@ start();
 async function start() {
   await connect();
 
-/* const todos = await readTodos();
-  console.log(todos)
-  const successCreate = await createTodo('Go to trader joes');
-  console.log(`Creating was ${successCreate}`)
-  const successDelete = await deleteTodo(1)
-  console.log(`Deleting was ${successDelete}`) */
-
 };
 
 async function connect() {

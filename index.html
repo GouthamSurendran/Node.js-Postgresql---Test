@@ -5,39 +5,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <title>Todo test</title>
 </head>
 
 <body>
-      <div class='container p-3 my-2 bg-primary text-white rounded' style="margin-top: 50%;">
-        <div class="row">
-          <div class="col-2 d-flex justify-content-start">
-            <h3>todo list</h3>
-          </div>
-          <div class="row">
-            <div class="col d-flex justify-content-start">
-              <ul id="olTodo">
-              </ul>
-            </div>
-          </div>
-        </div>
-        
-        <div class="row">
-          <div class="col d-flex justify-content-center">
-            <div class="form-inline" style="display: block; width: 60%;">
-              <input type="text" id="getItem" class="form-control" placeholder="Enter todo item" onfocus="this.value=''"
-                style="text-align: center; width: 100%;">
-                <div class="col d-flex justify-content-center">
-              <button type="button" class="btn btn-success" id='btnCreate'
-                style="width: 50%; margin-top: 10px;">Add</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="container">
+    <div>
+      <h3>todo list</h3>
     </div>
+    <div class="list">
+    <ul id="olTodo">
+    </ul>
+  </div>
+    <form style=" width: 60%;">
+      <input type="text" id="getItem" placeholder="Enter todo item" />
+      <button class="" id='btnCreate' style="width: 50%; margin-top: 10px;">Add</button>
+    </form>
+  </div>
+  </div>
+  </div>
 </body>
 
 <script>
@@ -45,7 +33,7 @@
   btnCreate.addEventListener("click", async e => {
     const jsonRequest = {}
     jsonRequest.text = document.getElementById("getItem").value;
-    if (jsonRequest.text != "" && jsonRequest.text != "Enter today's task to do") {
+    if (jsonRequest.text != "") {
       const result = await fetch("http://localhost:8080/todo", {
         method: "POST",
         headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
@@ -69,11 +57,33 @@
       todos.forEach(element => {
         const li = document.createElement("li");
         li.textContent = element.todotext;
-        li.id = element.id;
-        li.addEventListener("click", async e => {
+        const i1 = document.createElement("i");
+        i1.className = "fa fa-edit icon";
+        i1.id = element.id;
+        li.appendChild(i1);
+        i1.addEventListener("click", async e => {
+          const edit = prompt("Please enter the changes here", li.textContent);
+          if (edit != null) {
+            const jsonRequest = {};
+            jsonRequest.text = edit;
+            jsonRequest.id = e.target.id;
+            const result = await fetch("http://localhost:8080/todo", {
+              method: "PUT",
+              headers: { "content-type": "application/json" }, body: JSON.stringify(jsonRequest)
+            });
+            const success = await result.json();
+            readTodo();
+            alert("Todo item edited! ");
+          }
+        })
+        const i = document.createElement("i");
+        i.className = "fa fa-times icon";
+        i.id = element.id;
+        li.appendChild(i);
+        i.addEventListener("click", async e => {
           var result = confirm("Are you sure you want to delete the item?");
           if (result) {
-            const jsonRequest = {}
+            const jsonRequest = {};
             jsonRequest.id = e.target.id; //list element id
             const result = await fetch("http://localhost:8080/todo", {
               method: "DELETE",

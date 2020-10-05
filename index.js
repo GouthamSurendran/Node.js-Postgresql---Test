@@ -11,6 +11,8 @@ const pool = new Pool({
   port: "5432"
 });
 
+app.use('/', express.static(__dirname + '')); // This line important for serving static files from the directory.
+
 app.get("/", (req, res) => res.sendFile(`${__dirname}/index.html`));
 
 app.get("/todo", async (req, res) => {
